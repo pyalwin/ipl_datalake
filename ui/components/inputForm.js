@@ -4,13 +4,13 @@ const axios = require('axios');
 
 export default class InputForm extends React.Component{
     state = {
-        options: [2017,2018]
+        options: ['Choose any one to continue']
     }
 
     componentDidMount(){
         axios.get('http://localhost:8000/api/get-seasons').then((res) => {
-            console.log(res)
-            this.setState({options: res.data.seasons})
+            let options = res.data.seasons
+            this.setState({options: [...this.state.options, ...options]})
         }).catch((err) => {
             console.log(err)
         })
@@ -20,9 +20,17 @@ export default class InputForm extends React.Component{
         return(
             <Form>
                 <FormGroup>
-                    <Label for="season"></Label>
+                    <Label for="season">Select the season</Label>
                     <Input type="select" name="selectedSeason" id="season" onChange={this.props.selectedSeason}>
                         {this.state.options.map((item) => (
+                            <option>{item}</option>
+                        ))}
+                   </Input>
+                </FormGroup>
+                <FormGroup>
+                    <Label for="analysis">Select the analysis</Label>
+                    <Input type="select" name="selectedChoice" id="analysis" onChange={this.props.selectedChoice}>
+                        {this.props.optChoices.map((item) => (
                             <option>{item}</option>
                         ))}
                    </Input>

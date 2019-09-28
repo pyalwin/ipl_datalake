@@ -2,6 +2,7 @@ import React from 'react'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
 import Nav from '../components/nav'
+import Charts from '../components/charts';
 import InputForm from '../components/inputForm';
 import { Container, Row, Col } from 'reactstrap';
 const axios = require('axios');
@@ -14,8 +15,11 @@ const DynamicReactJson = dynamic(
 
 export default class Home extends React.Component{
   state = {
-    jsonResult: {}
+    jsonResult: {},
+    choices: ['Select a season'],
+    selectedSeason: null
   }
+
   selectedSeason = (e, v) => {
     let selectedSeason = e.target.value
     axios.get('http://localhost:8000/api/season-stats',{
@@ -23,11 +27,15 @@ export default class Home extends React.Component{
         season: selectedSeason
       }
     }).then((res) => {
-      console.log(res)
-      this.setState({jsonResult: res.data})
+      let choices = ['Choose an option', ...Object.keys(res.data)]
+      this.setState({jsonResult: res.data, choices: choices, selectedSeason: selectedSeason})
     }).catch((err) => {
         console.log(err)
     })
+  }
+
+  selectedChoice = (e, v) => {
+    this.setState({chosenChoice: e.target.value})
   }
 
   render(){
@@ -38,16 +46,23 @@ export default class Home extends React.Component{
       </Head>
   
       <Nav />
-      <Container>
-        <Row>
-        <Col xs="6">
-            <DynamicReactJson src={this.state.jsonResult} />
+      <div>
+        <Row className="chartContainer">
+        <Col xs="8">
+            {/*<DynamicReactJson src={this.state.jsonResult} />*/}
+            <Charts chartData={this.state.jsonResult} chosenChoice={this.state.chosenChoice} selectedSeason={this.state.selectedSeason}/>
           </Col>
-          <Col xs="6">
-            <InputForm selectedSeason={this.selectedSeason}></InputForm>
+          <Col xs="4">
+            <InputForm selectedSeason={this.selectedSeason} selectedChoice={this.selectedChoice} optChoices={this.state.choices}></InputForm>
           </Col>
         </Row>
-      </Container>
+      </div>
+      <style jsx global>{`
+         .chartContainer {
+           height: 80vh;
+           padding: 2%;
+         }
+      `}</style>
     </div>  
     )
   }
